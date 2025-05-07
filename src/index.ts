@@ -13,6 +13,9 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+// Nastavenie dôvery proxy pre Vercel
+app.set('trust proxy', 1); // Dôverovať prvému proxy (Vercel)
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
