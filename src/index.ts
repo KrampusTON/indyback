@@ -16,21 +16,24 @@ const port = process.env.PORT || 3001;
 // Nastavenie CORS
 const corsOptions = {
   origin: [
-    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io', // Lokálna doména Webcontainer
-    'http://localhost:3000', // Lokálny frontend (ak používaš Vite na inom porte)
-    // Pridaj 'https://indianadog.app', keď bude doména aktívna
+    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
+    'http://localhost:3000',
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-address', 'x-signature'],
+  allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'], // Pridané 'address' pre adminAuthMiddleware
   credentials: true,
 };
 
-app.use(cors(corsOptions));
+// Logovanie CORS požiadaviek
+app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log(`Received ${req.method} request to ${req.url} from origin: ${req.headers.origin}`);
+  next();
+});
 
-// Povolenie preflight požiadaviek (OPTIONS)
+app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-app.set('trust proxy', 1); // Dôverovať prvému proxy (Vercel)
+app.set('trust proxy', 1); // Dôverovať Vercel proxy
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -68,7 +71,6 @@ const startServer = async () => {
     await connectDatabase();
     console.log('MongoDB connected successfully');
 
-    // Spusti server iba v non-serverless prostredí (lokálne)
     if (process.env.VERCEL !== '1') {
       console.log('Starting Express server...');
       app.listen(port, () => {
@@ -85,7 +87,6 @@ const startServer = async () => {
   }
 };
 
-// Spusti startServer pri štarte aplikácie
 startServer().catch((err) => {
   console.error('Failed to initialize server:', err);
   process.exit(1);
