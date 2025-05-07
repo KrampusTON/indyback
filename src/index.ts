@@ -17,36 +17,55 @@ const port = process.env.PORT || 3001;
 console.log('Initializing Indianadog Backend API...');
 
 // Nastavenie CORS
+const allowedOrigins = [
+  'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
+  'http://localhost:3000',
+  // Pridajte produkčnú doménu frontendu, ak existuje
+  // 'https://your-frontend-domain.vercel.app',
+];
+
 const corsOptions = {
-  origin: [
-    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
-    'http://localhost:3000',
-  ],
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    console.log(`CORS: Checking origin ${origin}`);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
 };
 
-// Logovanie CORS požiadaviek
+// Logovanie všetkých požiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(`Received ${req.method} request to ${req.url} from origin: ${req.headers.origin}`);
+  console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
+  res.on('finish', () => {
+    console.log(`Response: ${req.method} ${req.url} status: ${res.statusCode}, headers:`, res.getHeaders());
+  });
   next();
 });
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*', (req: Request, res: Response) => {
+  console.log(`CORS: Handling OPTIONS ${req.url} from ${req.headers.origin}`);
+  cors(corsOptions)(req, res, () => res.status(200).end());
+});
 
 app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000, // Zvýšené pre testovanie
 });
 app.use(limiter);
 
+// Routy
 app.use('/api/referrals', referralRoutes);
 app.use('/api/sale', saleRoutes);
 app.use('/api/tasks', taskRoutes);
