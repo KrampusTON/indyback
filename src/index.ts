@@ -16,9 +16,9 @@ const port = process.env.PORT || 3001;
 // Nastavenie CORS
 const corsOptions = {
   origin: [
-    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io', // Lokálna doména pre testovanie
+    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io', // Lokálna doména Webcontainer
     'http://localhost:3000', // Lokálny frontend (ak používaš Vite na inom porte)
-    // Pridaj budúcu produkčnú doménu, napr. 'https://indianadog.app', keď bude dostupná
+    // Pridaj 'https://indianadog.app', keď bude doména aktívna
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature'],
