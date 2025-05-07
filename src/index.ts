@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
+import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { connectDatabase } from './config/database';
 import referralRoutes from './routes/referralRoutes';
@@ -11,6 +12,20 @@ dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT || 3001;
+
+// Nastavenie CORS
+const corsOptions = {
+  origin: [
+    'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io', // Lokálna doména pre testovanie
+    'http://localhost:3000', // Lokálny frontend (ak používaš Vite na inom porte)
+    // Pridaj budúcu produkčnú doménu, napr. 'https://indianadog.app', keď bude dostupná
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'x-address', 'x-signature'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 app.set('trust proxy', 1); // Dôverovať prvému proxy (Vercel)
 
