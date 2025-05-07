@@ -13,7 +13,9 @@ const User = mongoose.model('User', userSchema, 'users');
 export class ReferralService {
   // Validácia MultiversX adresy
   private validateAddress(address: string): boolean {
-    return /^erd1[a-z0-9]{58}$/.test(address);
+    const isValid = /^erd1[a-z0-9]{58}$/.test(address);
+    console.log(`Validating address ${address}: ${isValid}`);
+    return isValid;
   }
 
   async registerUser(address: string, name: string, referrerAddress?: string): Promise<any> {
@@ -26,9 +28,11 @@ export class ReferralService {
     }
 
     try {
+      console.log(`Registering user: ${address}, name: ${name}, referrer: ${referrerAddress}`);
       // Skontroluj, či používateľ už existuje
       const existingUser = await User.findOne({ address });
       if (existingUser) {
+        console.log(`User ${address} already registered`);
         throw new Error('User already registered');
       }
 
@@ -36,6 +40,7 @@ export class ReferralService {
       if (referrerAddress) {
         const referrer = await User.findOne({ address: referrerAddress });
         if (!referrer) {
+          console.log(`Referrer ${referrerAddress} not found`);
           throw new Error('Referrer not found');
         }
       }
@@ -47,6 +52,7 @@ export class ReferralService {
         referrerAddress: referrerAddress || null,
       });
       await user.save();
+      console.log(`User ${address} registered successfully`);
 
       return { message: 'User registered successfully', user: { address, name } };
     } catch (error: any) {
@@ -61,10 +67,11 @@ export class ReferralService {
     }
 
     try {
+      console.log(`Fetching stats for ${address}`);
       // Počet referralov
       const referralsCount = await User.countDocuments({ referrerAddress: address });
 
-      // Simulované štatistiky (prispôsob podľa logiky projektu)
+      // Simulované štatistiky
       const stats = {
         referrals: referralsCount,
         rewards: referralsCount * 100, // 100 INDY za referral
@@ -73,6 +80,7 @@ export class ReferralService {
         nextGoal: 50 - (referralsCount % 50), // Nasledujúci cieľ
       };
 
+      console.log(`Stats for ${address}:`, stats);
       return stats;
     } catch (error: any) {
       console.error('Error in getReferralStats:', error.message, error.stack);
@@ -86,6 +94,7 @@ export class ReferralService {
     }
 
     try {
+      console.log(`Fetching referral tree for ${address}`);
       const referralTree: { level: number; users: { name: string; address: string }[] }[] = [];
 
       // Rekurzívne získanie referralov
@@ -107,7 +116,7 @@ export class ReferralService {
       };
 
       await fetchReferrals(address, 1);
-
+      console.log(`Referral tree for ${address}:`, referralTree);
       return referralTree;
     } catch (error: any) {
       console.error('Error in getReferralTree:', error.message, error.stack);
