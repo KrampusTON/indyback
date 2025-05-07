@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -13,6 +13,9 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+// Logovanie štartu servera
+console.log('Initializing Indianadog Backend API...');
+
 // Nastavenie CORS
 const corsOptions = {
   origin: [
@@ -20,7 +23,7 @@ const corsOptions = {
     'http://localhost:3000',
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'], // Pridané 'address' pre adminAuthMiddleware
+  allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
 };
 
@@ -33,14 +36,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
-app.set('trust proxy', 1); // Dôverovať Vercel proxy
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minút
-  max: 100, // Max 100 požiadaviek na IP
+  windowMs: 15 * 60 * 1000,
+  max: 100,
 });
 app.use(limiter);
 
@@ -50,8 +53,14 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/', (req: Request, res: Response) => {
-  console.log('Received request to /');
+  console.log('Handling GET request to /');
   res.send('Indianadog Backend API');
+});
+
+// Fallback pre 404
+app.use((req: Request, res: Response) => {
+  console.log(`404: Request to ${req.url} not found`);
+  res.status(404).json({ error: 'Not Found' });
 });
 
 const startServer = async () => {
