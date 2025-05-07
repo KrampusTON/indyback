@@ -30,12 +30,12 @@ export const connectDatabase = async () => {
       });
 
       await mongoose.connect(uri, {
-        connectTimeoutMS: 30000,
-        serverSelectionTimeoutMS: 30000,
-        socketTimeoutMS: 60000,
+        connectTimeoutMS: 15000, // Znížené na 15s
+        serverSelectionTimeoutMS: 15000, // Znížené na 15s
+        socketTimeoutMS: 30000,
         family: 4,
-        maxPoolSize: 5,
-        minPoolSize: 1,
+        maxPoolSize: 10, // Zvýšené na 10
+        minPoolSize: 2, // Zvýšené na 2
         serverApi: { version: '1', strict: true, deprecationErrors: true },
         retryWrites: true,
         retryReads: true,
