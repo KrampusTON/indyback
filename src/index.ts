@@ -13,7 +13,6 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
-// Nastavenie dôvery proxy pre Vercel
 app.set('trust proxy', 1); // Dôverovať prvému proxy (Vercel)
 
 app.use(express.json());
@@ -62,7 +61,6 @@ const startServer = async () => {
       throw new Error('MONGODB_URI is not defined in .env');
     }
 
-    // Test siete
     console.log('Initiating network test...');
     await testNetwork();
     console.log('Network test completed');
@@ -86,7 +84,6 @@ const startServer = async () => {
   }
 };
 
-// Zachytávanie neošetrených chýb
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
@@ -97,10 +94,8 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-// Serverless export pre Vercel
 export default app;
 
-// Spustenie pre lokálne testovanie
 if (process.env.NODE_ENV !== 'production') {
   startServer();
 }
