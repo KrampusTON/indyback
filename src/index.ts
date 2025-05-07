@@ -20,12 +20,15 @@ const corsOptions = {
     'http://localhost:3000', // Lokálny frontend (ak používaš Vite na inom porte)
     // Pridaj 'https://indianadog.app', keď bude doména aktívna
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature'],
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+
+// Povolenie preflight požiadaviek (OPTIONS)
+app.options('*', cors(corsOptions));
 
 app.set('trust proxy', 1); // Dôverovať prvému proxy (Vercel)
 
