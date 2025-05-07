@@ -26,34 +26,26 @@ export const connectDatabase = async () => {
       });
       mongoose.connection.on('error', (err) => {
         console.error('MongoDB: Connection error event:', err.message, err.stack);
-        console.error('Error details:', JSON.stringify(err, null, 2));
       });
 
       await mongoose.connect(uri, {
-        connectTimeoutMS: 15000, // Znížené na 15s
-        serverSelectionTimeoutMS: 15000, // Znížené na 15s
+        connectTimeoutMS: 15000,
+        serverSelectionTimeoutMS: 15000,
         socketTimeoutMS: 30000,
         family: 4,
-        maxPoolSize: 10, // Zvýšené na 10
-        minPoolSize: 2, // Zvýšené na 2
+        maxPoolSize: 10,
+        minPoolSize: 2,
         serverApi: { version: '1', strict: true, deprecationErrors: true },
         retryWrites: true,
         retryReads: true,
       });
       console.log('MongoDB connection established');
-
-      const sampleSchema = new mongoose.Schema({ name: String });
-      const SampleModel = mongoose.model('Sample', sampleSchema, 'testcollection');
-      const newDoc = new SampleModel({ name: 'Test Document' });
-      await newDoc.save();
-      console.log('Document saved to indianadog database!');
       return;
     } catch (error: any) {
       console.error(`Attempt ${attempt}/${maxRetries} - MongoDB connection error:`, error.message);
       console.error('Error code:', error.code || 'undefined');
       console.error('Error reason:', error.reason || 'No reason provided');
       console.error('Stack trace:', error.stack);
-      console.error('Error details:', JSON.stringify(error, null, 2));
       if (attempt === maxRetries) {
         throw error;
       }
