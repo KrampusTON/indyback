@@ -6,7 +6,6 @@ import referralRoutes from './routes/referralRoutes';
 import saleRoutes from './routes/saleRoutes';
 import taskRoutes from './routes/taskRoutes';
 import adminRoutes from './routes/adminRoutes';
-import dns from 'dns';
 
 dotenv.config();
 
@@ -34,20 +33,6 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Indianadog Backend API');
 });
 
-const testNetwork = async () => {
-  try {
-    console.log('Testing DNS resolution for MongoDB...');
-    console.log('Current DNS servers:', dns.getServers());
-    dns.setServers(['1.1.1.1', '1.0.0.1']); // Cloudflare DNS
-    console.log('Set DNS servers to Cloudflare DNS:', dns.getServers());
-    const result = await dns.promises.resolve('indy.bqoteca.mongodb.net', 'A');
-    console.log('DNS resolution successful:', result);
-  } catch (err: any) {
-    console.error('DNS resolution error:', err.message, err.stack);
-    throw err;
-  }
-};
-
 const startServer = async () => {
   try {
     console.log('Starting server...');
@@ -60,10 +45,6 @@ const startServer = async () => {
     if (!process.env.MONGODB_URI) {
       throw new Error('MONGODB_URI is not defined in .env');
     }
-
-    console.log('Initiating network test...');
-    await testNetwork();
-    console.log('Network test completed');
 
     console.log('Initiating MongoDB connection...');
     await connectDatabase();
