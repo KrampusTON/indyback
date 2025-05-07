@@ -73,12 +73,17 @@ const startServer = async () => {
     console.log('ADMIN_ADDRESSES:', process.env.ADMIN_ADDRESSES);
 
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in .env');
+      console.warn('MONGODB_URI is not defined. Continuing without database...');
+    } else {
+      console.log('Initiating MongoDB connection...');
+      try {
+        await connectDatabase();
+        console.log('MongoDB connected successfully');
+      } catch (dbError: any) {
+        console.error('MongoDB connection failed:', dbError.message);
+        console.warn('Continuing without database connection...');
+      }
     }
-
-    console.log('Initiating MongoDB connection...');
-    await connectDatabase();
-    console.log('MongoDB connected successfully');
 
     if (process.env.VERCEL !== '1') {
       console.log('Starting Express server...');
