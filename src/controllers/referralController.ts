@@ -15,7 +15,13 @@ export class ReferralController {
       res.status(201).json(user);
     } catch (error: any) {
       console.error('Error in registerUser:', error.message, error.stack);
-      res.status(400).json({ error: error.message });
+      if (error.message === 'User already registered') {
+        res.status(409).json({ error: error.message });
+      } else if (error.message === 'Invalid MultiversX address' || error.message === 'Referrer not found') {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   }
 
@@ -26,7 +32,11 @@ export class ReferralController {
       res.status(200).json(stats);
     } catch (error: any) {
       console.error('Error in getReferralStats:', error.message, error.stack);
-      res.status(400).json({ error: error.message });
+      if (error.message === 'Invalid MultiversX address') {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   }
 
@@ -37,7 +47,11 @@ export class ReferralController {
       res.status(200).json(tree);
     } catch (error: any) {
       console.error('Error in getReferralTree:', error.message, error.stack);
-      res.status(400).json({ error: error.message });
+      if (error.message === 'Invalid MultiversX address') {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: 'Internal server error' });
+      }
     }
   }
 }
