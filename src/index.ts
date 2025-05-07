@@ -69,20 +69,28 @@ const startServer = async () => {
     await connectDatabase();
     console.log('MongoDB connected successfully');
 
-    console.log('Starting Express server...');
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    }).on('error', (err) => {
-      console.error('Server error:', err.message, err.stack);
-    });
+    // Spusti server iba v non-serverless prostredí (lokálne)
+    if (process.env.VERCEL !== '1') {
+      console.log('Starting Express server...');
+      app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      }).on('error', (err) => {
+        console.error('Server error:', err.message, err.stack);
+      });
+    }
   } catch (error: any) {
     console.error('Failed to start server:', error.message);
     console.error('Error details:', JSON.stringify(error, null, 2));
     console.error('Stack trace:', error.stack);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     throw error;
   }
 };
+
+// Spusti startServer pri štarte aplikácie
+startServer().catch((err) => {
+  console.error('Failed to initialize server:', err);
+  process.exit(1);
+});
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -95,7 +103,3 @@ process.on('uncaughtException', (error) => {
 });
 
 export default app;
-
-if (process.env.NODE_ENV !== 'production') {
-  startServer();
-}
