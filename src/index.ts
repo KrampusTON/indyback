@@ -28,14 +28,18 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.get('/', (req: Request, res: Response) => {
+  console.log('Received request to /');
   res.send('Indianadog Backend API');
 });
 
 const testNetwork = async () => {
   try {
     console.log('Testing DNS resolution for MongoDB...');
-    await dns.promises.resolve('indy.bqoteca.mongodb.net');
-    console.log('DNS resolution successful');
+    console.log('Current DNS servers:', dns.getServers());
+    dns.setServers(['1.1.1.1', '1.0.0.1']); // Cloudflare DNS
+    console.log('Set DNS servers to Cloudflare DNS:', dns.getServers());
+    const result = await dns.promises.resolve('indy.bqoteca.mongodb.net', 'A');
+    console.log('DNS resolution successful:', result);
   } catch (err: any) {
     console.error('DNS resolution error:', err.message, err.stack);
     throw err;
@@ -46,11 +50,8 @@ const startServer = async () => {
   try {
     console.log('Starting server...');
     console.log('Checking environment variables...');
-    console.log('Raw MONGODB_URI:', process.env.MONGODB_URI);
-    console.log(
-      'MONGODB_URI:',
-      process.env.MONGODB_URI?.replace(/:([^@]+)@/, ':****@')
-    );
+    console.log('Raw MONGODB_URI:', process.env.MONGODB_URI ? 'Defined' : 'Undefined');
+    console.log('MONGODB_URI:', process.env.MONGODB_URI?.replace(/:([^@]+)@/, ':****@'));
     console.log('PORT:', process.env.PORT);
     console.log('ADMIN_ADDRESSES:', process.env.ADMIN_ADDRESSES);
 
@@ -59,26 +60,26 @@ const startServer = async () => {
     }
 
     // Test siete
+    console.log('Initiating network test...');
     await testNetwork();
+    console.log('Network test completed');
 
-    console.log('Attempting to connect to MongoDB...');
+    console.log('Initiating MongoDB connection...');
     await connectDatabase();
     console.log('MongoDB connected successfully');
 
-    app
-      .listen(port, () => {
-        console.log(`Server running on port ${port}`);
-      })
-      .on('error', (err) => {
-        console.error('Server error:', err.message, err.stack);
-      });
+    console.log('Starting Express server...');
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    }).on('error', (err) => {
+      console.error('Server error:', err.message, err.stack);
+    });
   } catch (error: any) {
     console.error('Failed to start server:', error.message);
     console.error('Error details:', JSON.stringify(error, null, 2));
     console.error('Stack trace:', error.stack);
-    // Oneskorenie pre zapísanie logov
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    process.exit(1);
+    throw error;
   }
 };
 
@@ -93,4 +94,10 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-startServer();
+// Serverless export pre Vercel
+export default app;
+
+// Spustenie pre lokálne testovanie
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+}
