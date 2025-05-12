@@ -6,23 +6,13 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.js",
-      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "https://indianadog.club"
-      }
-    }
-  ],
-  "headers": [
+  "rewrites": [
     {
       "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://indianadog.club" }
-      ]
+      "destination": "/dist/index.js"
     }
   ],
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
   "trailingSlash": false
 }
