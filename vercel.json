@@ -12,7 +12,7 @@
       "dest": "/dist/index.js",
       "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       "headers": {
-        "Access-Control-Allow-Origin": "https://indianadog.club",
+        "Access-Control-Allow-Origin": "https://www.indianadog.club",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
         "Access-Control-Allow-Credentials": "true"
