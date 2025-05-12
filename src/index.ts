@@ -23,7 +23,7 @@ app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
-  'https://indiana-three.vercel.app'
+  'https://indiana-three.vercel.app',
   // Pridajte produkčnú doménu frontendu, ak existuje
   // 'https://your-frontend-domain.vercel.app',
 ];
@@ -69,12 +69,23 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Routy
+// Debug logy pre routy
+console.log('Registering routes...');
+console.log('Referral routes:', referralRoutes);
 app.use('/api/referrals', referralRoutes);
+console.log('Referral routes registered');
+console.log('Sale routes:', saleRoutes);
 app.use('/api/sale', saleRoutes);
+console.log('Sale routes registered');
+console.log('Task routes:', taskRoutes);
 app.use('/api/tasks', taskRoutes);
+console.log('Task routes registered');
+console.log('Admin routes:', adminRoutes);
 app.use('/api/admin', adminRoutes);
+console.log('Admin routes registered');
+console.log('All routes registered successfully');
 
+// Root endpoint
 app.get('/', (req: Request, res: Response) => {
   console.log('Handling GET request to /');
   res.send('Indianadog Backend API');
