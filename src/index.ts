@@ -21,7 +21,7 @@ app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 // Nastavenie CORS
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
-  'http://localhost:3000',
+  'https://indianadog.club',
   'https://indiana-three.vercel.app'
 ];
 
