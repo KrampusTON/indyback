@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "echo 'Running tsc...' && tsc && echo 'tsc completed'",
     "dev": "nodemon src/index.ts"
   },
   "dependencies": {
