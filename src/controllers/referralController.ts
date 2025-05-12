@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ReferralService } from '../services/referralService';
-import { User } from '@multiversx/sdk-wallet/out';
-import { verifyMessage } from '@multiversx/sdk-wallet/out';
+import { Address, UserVerifier } from '@multiversx/sdk-wallet';
 
 export class ReferralController {
   private referralService: ReferralService;
@@ -23,12 +22,11 @@ export class ReferralController {
       const message = req.url.includes('stats')
         ? `Stats request for ${address}`
         : `Tree request for ${address}`;
-      const user = User.fromAddress(address);
-      const isValid = verifyMessage({
-        message,
-        address: user.address,
-        signature,
-      });
+      const userAddress = new Address(address);
+      const verifier = UserVerifier.fromAddress(userAddress);
+
+      // Overenie podpisu
+      const isValid = verifier.verify(Buffer.from(message), Buffer.from(signature, 'hex'));
 
       if (!isValid) {
         console.log(`Authentication failed: Invalid signature for ${address}`);
