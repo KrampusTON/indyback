@@ -15,13 +15,6 @@ const port = process.env.PORT || 3001;
 
 console.log('Initializing Indianadog Backend API...');
 
-// Middleware na normalizáciu URL (odstránenie skrytých znakov)
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.url = req.url.replace(/%0A/g, '').replace(/\n/g, '').trim();
-  console.log(`Normalized URL: ${req.method} ${req.url}`);
-  next();
-});
-
 // Ignorovanie požiadaviek na favicon.ico
 app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 
@@ -29,12 +22,10 @@ app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
-  'https://indiana-three.vercel.app',
-  'https://indianadog.club',
-  'https://www.indianadog.club'
+  'https://indiana-three.vercel.app'
 ];
 
-console.log('Allowed origins at startup:', allowedOrigins);
+console.log('Allowed origins:', allowedOrigins);
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -51,6 +42,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+// Logovanie požiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
   res.on('finish', () => {
@@ -61,11 +53,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(cors(corsOptions));
 
+// Explicitná obsluha OPTIONS požiadaviek
 app.options('*', (req: Request, res: Response) => {
-  console.log(`CORS: Handling OPTIONS ${req.url} from ${req.headers.origin}`);
-  cors(corsOptions)(req, res, () => res.status(200).end());
+  console.log(`Handling OPTIONS request for ${req.url} from ${req.headers.origin}`);
+  res.set({
+    'Access-Control-Allow-Origin': 'https://indiana-three.vercel.app',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, x-address, x-signature, address',
+    'Access-Control-Allow-Credentials': 'true',
+  });
+  res.status(200).end();
 });
 
+// Ostatné middleware
 app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -76,6 +76,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Routy
 console.log('Registering routes...');
 console.log('Referral routes:', referralRoutes);
 app.use('/api/referrals', referralRoutes);
