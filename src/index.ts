@@ -13,7 +13,6 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
-// Logovanie štartu servera
 console.log('Initializing Indianadog Backend API...');
 
 // Middleware na normalizáciu URL (odstránenie skrytých znakov)
@@ -35,6 +34,8 @@ const allowedOrigins = [
   'https://www.indianadog.club'
 ];
 
+console.log('Allowed origins at startup:', allowedOrigins);
+
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     console.log(`CORS: Checking origin ${origin}`);
@@ -50,7 +51,6 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-// Logovanie všetkých požiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
   res.on('finish', () => {
@@ -70,14 +70,12 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
 });
 app.use(limiter);
 
-// Debug logy pre routy
 console.log('Registering routes...');
 console.log('Referral routes:', referralRoutes);
 app.use('/api/referrals', referralRoutes);
@@ -93,13 +91,11 @@ app.use('/api/admin', adminRoutes);
 console.log('Admin routes registered');
 console.log('All routes registered successfully');
 
-// Root endpoint
 app.get('/', (req: Request, res: Response) => {
   console.log('Handling GET request to /');
   res.send('Indianadog Backend API');
 });
 
-// Fallback pre 404
 app.use((req: Request, res: Response) => {
   console.log(`404: Request to ${req.url} not found`);
   res.status(404).json({ error: 'Not Found' });
