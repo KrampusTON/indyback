@@ -21,8 +21,10 @@ app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 // Nastavenie CORS
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
-  'https://www.indianadog.club',
-  'https://indiana-three.vercel.app'
+  'https://indianadog.club',
+  'https://www.indianadog.club', // Pridaj túto doménu
+  'https://indiana-three.vercel.app',
+  'http://localhost:3000'
 ];
 
 console.log('Allowed origins:', allowedOrigins);
@@ -39,7 +41,7 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
-  optionsSuccessStatus: 200, // Pre istotu
+  optionsSuccessStatus: 200,
 };
 
 // Logovanie požiadaviek
@@ -54,7 +56,20 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(cors(corsOptions));
 
 // Explicitná obsluha OPTIONS požiadaviek
-app.options('*', cors(corsOptions));
+app.options('*', (req: Request, res: Response) => {
+  console.log(`Handling OPTIONS request for ${req.url} from ${req.headers.origin}`);
+  if (req.headers.origin && allowedOrigins.includes(req.headers.origin)) {
+    res.set({
+      'Access-Control-Allow-Origin': req.headers.origin,
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, x-address, x-signature, address',
+      'Access-Control-Allow-Credentials': 'true',
+    });
+    res.status(200).end();
+  } else {
+    res.status(403).json({ error: `CORS: Origin ${req.headers.origin} not allowed` });
+  }
+});
 
 // Ostatné middleware
 app.set('trust proxy', 1);
