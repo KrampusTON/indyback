@@ -13,21 +13,25 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
+// Logovanie Ĺˇtartu servera
 console.log('Initializing Indianadog Backend API...');
 
-// Ignorovanie požiadaviek na favicon.ico
+// Middleware na normalizĂˇciu URL (odstrĂˇnenie skrytĂ˝ch znakov)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  req.url = req.url.replace(/%0A/g, '').replace(/\n/g, '');
+  console.log(`Normalized URL: ${req.method} ${req.url}`);
+  next();
+});
+
+// Ignorovanie poĹľiadaviek na favicon.ico
 app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 
 // Nastavenie CORS
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
-  'https://indianadog.club',
-  'https://www.indianadog.club', // Pridaj túto doménu
+  'http://localhost:3000',
   'https://indiana-three.vercel.app',
-  'http://localhost:3000'
 ];
-
-console.log('Allowed origins:', allowedOrigins);
 
 const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -41,10 +45,9 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
-  optionsSuccessStatus: 200,
 };
 
-// Logovanie požiadaviek
+// Logovanie vĹˇetkĂ˝ch poĹľiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
   res.on('finish', () => {
@@ -55,34 +58,23 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(cors(corsOptions));
 
-// Explicitná obsluha OPTIONS požiadaviek
 app.options('*', (req: Request, res: Response) => {
-  console.log(`Handling OPTIONS request for ${req.url} from ${req.headers.origin}`);
-  if (req.headers.origin && allowedOrigins.includes(req.headers.origin)) {
-    res.set({
-      'Access-Control-Allow-Origin': req.headers.origin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, x-address, x-signature, address',
-      'Access-Control-Allow-Credentials': 'true',
-    });
-    res.status(200).end();
-  } else {
-    res.status(403).json({ error: `CORS: Origin ${req.headers.origin} not allowed` });
-  }
+  console.log(`CORS: Handling OPTIONS ${req.url} from ${req.headers.origin}`);
+  cors(corsOptions)(req, res, () => res.status(200).end());
 });
 
-// Ostatné middleware
 app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000,
+  max: 1000, // ZvĂ˝ĹˇenĂ© pre testovanie
 });
 app.use(limiter);
 
-// Routy
+// Debug logy pre routy
 console.log('Registering routes...');
 console.log('Referral routes:', referralRoutes);
 app.use('/api/referrals', referralRoutes);
@@ -98,11 +90,13 @@ app.use('/api/admin', adminRoutes);
 console.log('Admin routes registered');
 console.log('All routes registered successfully');
 
+// Root endpoint
 app.get('/', (req: Request, res: Response) => {
   console.log('Handling GET request to /');
   res.send('Indianadog Backend API');
 });
 
+// Fallback pre 404
 app.use((req: Request, res: Response) => {
   console.log(`404: Request to ${req.url} not found`);
   res.status(404).json({ error: 'Not Found' });
