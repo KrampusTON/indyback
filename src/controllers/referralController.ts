@@ -58,7 +58,7 @@ export class ReferralController {
         res.status(409).json({ error: error.message });
       } else if (
         error.message === 'Invalid user address' ||
-        error.message === 'Invalid referrer address' ||
+        error.message === 'Invalid marcher address' ||
         error.message === 'Referrer not found' ||
         error.message === 'Self-referral is not allowed'
       ) {
