@@ -13,17 +13,17 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT || 3001;
 
-// Logovanie Ĺˇtartu servera
+// Logovanie štartu servera
 console.log('Initializing Indianadog Backend API...');
 
-// Middleware na normalizĂˇciu URL (odstrĂˇnenie skrytĂ˝ch znakov)
+// Middleware na normalizáciu URL (odstránenie skrytých znakov)
 app.use((req: Request, res: Response, next: NextFunction) => {
-  req.url = req.url.replace(/%0A/g, '').replace(/\n/g, '');
+  req.url = req.url.replace(/%0A/g, '').replace(/\n/g, '').trim();
   console.log(`Normalized URL: ${req.method} ${req.url}`);
   next();
 });
 
-// Ignorovanie poĹľiadaviek na favicon.ico
+// Ignorovanie požiadaviek na favicon.ico
 app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 
 // Nastavenie CORS
@@ -31,6 +31,8 @@ const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
   'https://indiana-three.vercel.app',
+  'https://indianadog.club',
+  'https://www.indianadog.club'
 ];
 
 const corsOptions = {
@@ -45,9 +47,10 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
+  optionsSuccessStatus: 200,
 };
 
-// Logovanie vĹˇetkĂ˝ch poĹľiadaviek
+// Logovanie všetkých požiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
   res.on('finish', () => {
@@ -70,7 +73,7 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000, // ZvĂ˝ĹˇenĂ© pre testovanie
+  max: 1000,
 });
 app.use(limiter);
 
