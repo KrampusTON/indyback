@@ -16,6 +16,13 @@ const port = process.env.PORT || 3001;
 // Logovanie štartu servera
 console.log('Initializing Indianadog Backend API...');
 
+// Middleware na normalizáciu URL (odstránenie skrytých znakov)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  req.url = req.url.replace(/%0A/g, '').replace(/\n/g, '');
+  console.log(`Normalized URL: ${req.method} ${req.url}`);
+  next();
+});
+
 // Ignorovanie požiadaviek na favicon.ico
 app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 
@@ -24,8 +31,6 @@ const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
   'https://indiana-three.vercel.app',
-  // Pridajte produkčnú doménu frontendu, ak existuje
-  // 'https://your-frontend-domain.vercel.app',
 ];
 
 const corsOptions = {
