@@ -2,37 +2,34 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/index.ts",
+      "src": "backend/index.ts",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
-  ],
-  "headers": [
+      "src": "/api/referrals/(.*)",
+      "dest": "/backend/index.ts",
+      "methods": ["GET", "POST", "OPTIONS"]
+    },
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, x-address, x-signature, address"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        }
-      ]
+      "src": "/api/sale/(.*)",
+      "dest": "/backend/index.ts",
+      "methods": ["GET", "POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/tasks/(.*)",
+      "dest": "/backend/index.ts",
+      "methods": ["GET", "POST", "OPTIONS"]
+    },
+    {
+      "src": "/api/admin/(.*)",
+      "dest": "/backend/index.ts",
+      "methods": ["GET", "POST", "OPTIONS"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/backend/index.ts"
     }
   ]
 }
