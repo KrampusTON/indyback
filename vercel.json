@@ -2,16 +2,24 @@
   "version": 2,
   "builds": [
     {
-      "src": "src/index.ts",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/index.ts"
+      "dest": "/dist/index.js",
+      "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://indiana-three.vercel.app",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
+        "Access-Control-Allow-Credentials": "true"
+      }
     }
   ],
   "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "trailingSlash": false
 }
