@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ReferralService } from '../services/referralService';
-import { Address, UserVerifier } from '@multiversx/sdk-wallet';
+import { Address } from '@multiversx/sdk-core';
+import { UserVerifier } from '@multiversx/sdk-wallet';
 
 export class ReferralController {
   private referralService: ReferralService;
