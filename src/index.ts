@@ -6,55 +6,83 @@ import { connectDatabase } from './config/database';
 import referralRoutes from './routes/referralRoutes';
 import saleRoutes from './routes/saleRoutes';
 import taskRoutes from './routes/taskRoutes';
-import adminRoutes from './routes/adminRoutes';dotenv.config();const app: Express = express();
-const port = process.env.PORT || 3001;// Logovanie štartu servera
-console.log('Initializing Indianadog Backend API...');// Nastavenie CORS
+import adminRoutes from './routes/adminRoutes';
+
+dotenv.config();
+
+const app: Express = express();
+const port = process.env.PORT || 3001;
+
+// Logovanie štartu servera
+console.log('Initializing Indianadog Backend API...');
+
+// Nastavenie CORS
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
   // Pridajte produkčnú doménu frontendu, ak existuje
   // 'https://your-frontend-domain.vercel.app',
-];const corsOptions = {
+];
+
+const corsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    console.log(CORS: Checking origin ${origin});
+    console.log(`CORS: Checking origin ${origin}`);
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(CORS: Origin ${origin} not allowed));
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'x-address', 'x-signature', 'address'],
   credentials: true,
-};// Logovanie všetkých požiadaviek
+};
+
+// Logovanie všetkých požiadaviek
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log(Request: ${req.method} ${req.url} from origin: ${req.headers.origin});
+  console.log(`Request: ${req.method} ${req.url} from origin: ${req.headers.origin}`);
   res.on('finish', () => {
-    console.log(Response: ${req.method} ${req.url} status: ${res.statusCode}, headers:, res.getHeaders());
+    console.log(`Response: ${req.method} ${req.url} status: ${res.statusCode}, headers:`, res.getHeaders());
   });
   next();
-});app.use(cors(corsOptions));
+});
+
+app.use(cors(corsOptions));
+
 app.options('*', (req: Request, res: Response) => {
-  console.log(CORS: Handling OPTIONS ${req.url} from ${req.headers.origin});
+  console.log(`CORS: Handling OPTIONS ${req.url} from ${req.headers.origin}`);
   cors(corsOptions)(req, res, () => res.status(200).end());
-});app.set('trust proxy', 1);app.use(express.json());
-app.use(express.urlencoded({ extended: true }));// Rate limiting
+});
+
+app.set('trust proxy', 1);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000, // Zvýšené pre testovanie
 });
-app.use(limiter);// Routy
+app.use(limiter);
+
+// Routy
 app.use('/api/referrals', referralRoutes);
 app.use('/api/sale', saleRoutes);
 app.use('/api/tasks', taskRoutes);
-app.use('/api/admin', adminRoutes);app.get('/', (req: Request, res: Response) => {
+app.use('/api/admin', adminRoutes);
+
+app.get('/', (req: Request, res: Response) => {
   console.log('Handling GET request to /');
   res.send('Indianadog Backend API');
-});// Fallback pre 404
+});
+
+// Fallback pre 404
 app.use((req: Request, res: Response) => {
-  console.log(404: Request to ${req.url} not found);
+  console.log(`404: Request to ${req.url} not found`);
   res.status(404).json({ error: 'Not Found' });
-});const startServer = async () => {
+});
+
+const startServer = async () => {
   try {
     console.log('Starting server...');
     console.log('Checking environment variables...');
@@ -63,42 +91,48 @@ app.use((req: Request, res: Response) => {
     console.log('PORT:', process.env.PORT);
     console.log('ADMIN_ADDRESSES:', process.env.ADMIN_ADDRESSES);
 
-if (!process.env.MONGODB_URI) {
-  console.warn('MONGODB_URI is not defined. Continuing without database...');
-} else {
-  console.log('Initiating MongoDB connection...');
-  try {
-    await connectDatabase();
-    console.log('MongoDB connected successfully');
-  } catch (dbError: any) {
-    console.error('MongoDB connection failed:', dbError.message);
-    console.warn('Continuing without database connection...');
-  }
-}
+    if (!process.env.MONGODB_URI) {
+      console.warn('MONGODB_URI is not defined. Continuing without database...');
+    } else {
+      console.log('Initiating MongoDB connection...');
+      try {
+        await connectDatabase();
+        console.log('MongoDB connected successfully');
+      } catch (dbError: any) {
+        console.error('MongoDB connection failed:', dbError.message);
+        console.warn('Continuing without database connection...');
+      }
+    }
 
-if (process.env.VERCEL !== '1') {
-  console.log('Starting Express server...');
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  }).on('error', (err) => {
-    console.error('Server error:', err.message, err.stack);
-  });
-}
-
+    if (process.env.VERCEL !== '1') {
+      console.log('Starting Express server...');
+      app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+      }).on('error', (err) => {
+        console.error('Server error:', err.message, err.stack);
+      });
+    }
   } catch (error: any) {
     console.error('Failed to start server:', error.message);
     console.error('Error details:', JSON.stringify(error, null, 2));
     console.error('Stack trace:', error.stack);
     throw error;
   }
-};startServer().catch((err) => {
+};
+
+startServer().catch((err) => {
   console.error('Failed to initialize server:', err);
   process.exit(1);
-});process.on('unhandledRejection', (reason, promise) => {
+});
+
+process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
   process.exit(1);
-});process.on('uncaughtException', (error) => {
+});
+
+process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error.message, error.stack);
   process.exit(1);
-});export default app;
+});
 
+export default app;
