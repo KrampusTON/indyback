@@ -13,9 +13,10 @@ export class ReferralController {
   private authenticate = (req: Request, res: Response, next: NextFunction) => {
     const address = req.headers['x-address'] as string;
     const signature = req.headers['x-signature'] as string;
+
     if (!address || !signature) {
       console.log(`Authentication failed: Missing headers for ${req.url}`);
-      return res.status(401).json({ error: 'Missing authentication headers' });
+      return res.status(401).json({ error: 'Missing x-address or x-signature header' });
     }
 
     try {
@@ -35,30 +36,38 @@ export class ReferralController {
       console.log(`Authentication successful for ${address}`);
       next();
     } catch (error: any) {
-      console.error(`Signature verification error: ${error.message}`);
-      return res.status(401).json({ error: 'Signature verification failed' });
+      console.error(`Signature verification error for ${address}: ${error.message}`);
+      return res.status(401).json({ error: 'Signature verification failed', details: error.message });
     }
   };
 
   async registerUser(req: Request, res: Response): Promise<void> {
     try {
       const { address, name, referrerAddress } = req.body;
-      console.log(`Processing registerUser: address=${address}, name=${name}, referrerAddress=${referrerAddress}`);
+      console.log(`Registering user: address=${address}, name=${name}, referrerAddress=${referrerAddress || 'none'}`);
+      
       if (!address || !name) {
+        console.log('Validation failed: Missing address or name');
         res.status(400).json({ error: 'Address and name are required' });
         return;
       }
+
       const user = await this.referralService.registerUser(address, name, referrerAddress);
-      console.log(`registerUser response:`, user);
+      console.log(`User registered successfully:`, user);
       res.status(201).json(user);
     } catch (error: any) {
       console.error('Error in registerUser:', error.message, error.stack);
       if (error.message === 'User already registered') {
         res.status(409).json({ error: error.message });
-      } else if (error.message === 'Invalid user address' || error.message === 'Invalid referrer address' || error.message === 'Referrer not found' || error.message === 'Self-referral is not allowed') {
+      } else if (
+        error.message === 'Invalid user address' ||
+        error.message === 'Invalid referrer address' ||
+        error.message === 'Referrer not found' ||
+        error.message === 'Self-referral is not allowed'
+      ) {
         res.status(400).json({ error: error.message });
       } else {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error', details: error.message });
       }
     }
   }
@@ -67,9 +76,16 @@ export class ReferralController {
     this.authenticate(req, res, async () => {
       try {
         const { address } = req.params;
-        console.log(`Processing getReferralStats for address: ${address}`);
+        console.log(`Fetching referral stats for address: ${address}`);
+        
+        if (!address) {
+          console.log('Validation failed: Missing address parameter');
+          res.status(400).json({ error: 'Address parameter is required' });
+          return;
+        }
+
         const stats = await this.referralService.getReferralStats(address);
-        console.log(`getReferralStats response:`, stats);
+        console.log(`Referral stats retrieved:`, stats);
         res.status(200).json(stats);
       } catch (error: any) {
         console.error('Error in getReferralStats:', error.message, error.stack);
@@ -86,9 +102,16 @@ export class ReferralController {
     this.authenticate(req, res, async () => {
       try {
         const { address } = req.params;
-        console.log(`Processing getReferralTree for address: ${address}`);
+        console.log(`Fetching referral tree for address: ${address}`);
+        
+        if (!address) {
+          console.log('Validation failed: Missing address parameter');
+          res.status(400).json({ error: 'Address parameter is required' });
+          return;
+        }
+
         const tree = await this.referralService.getReferralTree(address);
-        console.log(`getReferralTree response:`, tree);
+        console.log(`Referral tree retrieved:`, tree);
         res.status(200).json(tree);
       } catch (error: any) {
         console.error('Error in getReferralTree:', error.message, error.stack);
