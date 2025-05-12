@@ -23,6 +23,7 @@ app.get('/favicon.ico', (req: Request, res: Response) => res.status(204).end());
 const allowedOrigins = [
   'https://sb1sc4kvuv2-1g4t--3000--4d9fd228.local-credentialless.webcontainer.io',
   'http://localhost:3000',
+  'https://indiana-three.vercel.app'
   // Pridajte produkčnú doménu frontendu, ak existuje
   // 'https://your-frontend-domain.vercel.app',
 ];
