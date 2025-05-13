@@ -8,50 +8,8 @@
   ],
   "routes": [
     {
-      "src": "/api/referrals/register",
-      "methods": ["OPTIONS"],
-      "dest": "/dist/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://indiana-three.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
-        "Access-Control-Allow-Credentials": "true"
-      }
-    },
-    {
-      "src": "/api/referrals/stats/.*",
-      "methods": ["OPTIONS"],
-      "dest": "/dist/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://indiana-three.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
-        "Access-Control-Allow-Credentials": "true"
-      }
-    },
-    {
-      "src": "/api/referrals/tree/.*",
-      "methods": ["OPTIONS"],
-      "dest": "/dist/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://indiana-three.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
-        "Access-Control-Allow-Credentials": "true"
-      }
-    },
-    {
       "src": "/(.*)",
-      "dest": "/dist/index.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://indiana-three.vercel.app",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, x-address, x-signature, address",
-        "Access-Control-Allow-Credentials": "true"
-      }
+      "dest": "/dist/index.js"
     }
-  ],
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
-  "trailingSlash": false
+  ]
 }
